@@ -1,6 +1,7 @@
 package com.urlshortene.tinyroute.service.impl;
 
 import com.urlshortene.tinyroute.dto.UrlDataDto;
+import com.urlshortene.tinyroute.exception.ResourceNotFoundException;
 import com.urlshortene.tinyroute.repository.UrlDataRepository;
 import com.urlshortene.tinyroute.service.UrlService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,8 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public String getOriginalUrl(String shortUrl) {
-        return "";
+        String url =  urlDataRepository.findByShortUrl(shortUrl).orElseThrow(() -> new ResourceNotFoundException(shortUrl + " Not Found"));
+     return url;
     }
 
     @Override
