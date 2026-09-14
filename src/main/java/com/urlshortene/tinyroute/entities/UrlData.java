@@ -26,6 +26,7 @@ public class UrlData {
     @Enumerated(EnumType.STRING)
     private Visibility visibility;
 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_url_id")
     @JsonBackReference
     private UserData userUrls;

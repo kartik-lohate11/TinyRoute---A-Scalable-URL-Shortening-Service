@@ -1,5 +1,8 @@
 package com.urlshortene.tinyroute.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class UrlUtil {
 
     private static final char[] BASE62 =
@@ -33,6 +36,8 @@ public class UrlUtil {
             result[index--] = BASE62[(int) (id % 62)];
             id /= 62;
         }
+
+        log.info(id + " url is created");
 
         return new String(result);
     }

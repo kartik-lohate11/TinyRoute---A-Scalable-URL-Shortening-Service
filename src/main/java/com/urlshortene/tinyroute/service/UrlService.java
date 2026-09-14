@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UrlService {
     // Create a short URL
-    UrlDataDto createShortUrl(UrlDataDto urlDataDto);
+    UrlDataDto createShortUrl(String url,Long id);
 
     // Redirect / get original URL using short code
     String getOriginalUrl(String shortUrl);
