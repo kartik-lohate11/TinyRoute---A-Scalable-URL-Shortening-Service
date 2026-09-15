@@ -1,0 +1,6 @@
+{
+  "name": "TinyRoute – URL Shortener",
+  "description": "Modern URL shortener with sub-millisecond edge redirection, real-time telemetry, and enterprise link management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
