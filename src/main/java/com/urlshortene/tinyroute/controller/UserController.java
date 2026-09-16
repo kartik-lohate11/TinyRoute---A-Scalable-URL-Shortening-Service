@@ -20,5 +20,10 @@ public class UserController {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> health(){
+        return ResponseEntity.ok("Serve is healthy");
+    }
+
 
 }

@@ -4,19 +4,34 @@ import com.urlshortene.tinyroute.entities.UrlData;
 import com.urlshortene.tinyroute.entities.UserData;
 import com.urlshortene.tinyroute.enums.Visibility;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class UrlDataDto {
     private Long id;
     private String shortUrl;
     private String originalUrl;
     private Long totalClicked;
     private Visibility visibility;
-    private UserData userUrls;
+    private Long userId;
     private LocalDateTime createdTime;
     private LocalDateTime updateTime;
+
+    public UrlDataDto(Long id, String shortUrl, String originalUrl, Long totalClicked, Visibility visibility, Long userId, LocalDateTime createdTime, LocalDateTime updateTime) {
+
+        this.id = id;
+        this.shortUrl = shortUrl;
+        this.originalUrl = originalUrl;
+        this.totalClicked = totalClicked;
+        this.visibility = visibility;
+        this.userId = userId;
+        this.createdTime = createdTime;
+        this.updateTime = updateTime;
+    }
+
 
     public static UrlDataDto toDto(UrlData url) {
 

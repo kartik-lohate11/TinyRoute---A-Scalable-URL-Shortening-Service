@@ -1,6 +1,7 @@
 package com.urlshortene.tinyroute.controller;
 
 import com.urlshortene.tinyroute.dto.Request.ShortUrlRequest;
+import com.urlshortene.tinyroute.dto.Request.UrlUpdateRequest;
 import com.urlshortene.tinyroute.service.UrlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,10 +40,19 @@ public class UrlController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUrl(@PathVariable Long id) {
-
         urlService.deleteUrl(id);
-
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> updateUrl(@RequestBody UrlUpdateRequest request) {
+        return ResponseEntity.ok(urlService.updateUrl(request.id(), request.url()));
+    }
+
+    @GetMapping("/all-url/{id}")
+    public ResponseEntity<?> getAllUserUrl(@PathVariable
+                                           Long id) {
+        return ResponseEntity.ok(urlService.getUrlsByUserId(id));
     }
 
 }

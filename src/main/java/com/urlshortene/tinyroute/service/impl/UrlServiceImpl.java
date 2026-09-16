@@ -33,19 +33,13 @@ public class UrlServiceImpl implements UrlService {
             throw new IllegalArgumentException("URL cannot be empty");
         }
 
-        Optional<UrlData> existingUrl =
-                urlDataRepository.findByOriginalUrlAndUserUrlsId(url, userId);
+        Optional<UrlData> existingUrl = urlDataRepository.findByOriginalUrlAndUserUrlsId(url, userId);
 
         if (existingUrl.isPresent()) {
-            throw new IllegalArgumentException(
-                    "You have already created a short URL for this URL"
-            );
+            throw new IllegalArgumentException("You have already created a short URL for this URL");
         }
 
-        UserData userData = userDataRepository.findById(userId)
-                .orElseThrow(() ->
-                        new UserNotFoundException(userId + " Not Found")
-                );
+        UserData userData = userDataRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId + " Not Found"));
 
         UrlData urlData = new UrlData();
         urlData.setOriginalUrl(url);
@@ -70,18 +64,21 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public UrlDataDto getUrlById(Long id) {
-        return null;
+        UrlData urlData = urlDataRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Url not found"));
+        return UrlDataDto.toDto(urlData);
     }
 
     @Override
     public List<UrlDataDto> getUrlsByUserId(Long userId) {
-        return List.of();
+        return urlDataRepository.findAllUrlByUserId(userId);
     }
 
     @Override
-    public UrlDataDto updateUrl(Long id, UrlDataDto urlDataDto) {
-        UrlData url = urlDataRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Url not found"));
-        return null;
+    public UrlDataDto updateUrl(Long id, String url) {
+        UrlData urlData = urlDataRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Url not found"));
+        urlData.setOriginalUrl(url);
+        urlDataRepository.save(urlData);
+        return UrlDataDto.toDto(urlData);
     }
 
     @Override

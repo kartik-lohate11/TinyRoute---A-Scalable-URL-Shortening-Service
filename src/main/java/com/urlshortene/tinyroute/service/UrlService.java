@@ -18,7 +18,7 @@ public interface UrlService {
     List<UrlDataDto> getUrlsByUserId(Long userId);
 
     // Update URL details
-    UrlDataDto updateUrl(Long id, UrlDataDto urlDataDto);
+    UrlDataDto updateUrl(Long id, String url);
 
     // Delete URL
     void deleteUrl(Long id);
