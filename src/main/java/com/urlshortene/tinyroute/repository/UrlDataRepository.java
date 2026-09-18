@@ -31,4 +31,9 @@ public interface UrlDataRepository extends JpaRepository<UrlData,Long> {
         WHERE u.userUrls.id = :userId
     """)
     List<UrlDataDto> findAllUrlByUserId(@Param("userId") Long userId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("UPDATE UrlData u SET u.totalClicked = COALESCE(u.totalClicked, 0) + :hits WHERE u.shortUrl = :shortUrl")
+    int incrementTotalClicksByShortUrl(@Param("shortUrl") String shortUrl, @Param("hits") Long hits);
 }

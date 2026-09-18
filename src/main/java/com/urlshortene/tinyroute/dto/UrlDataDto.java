@@ -44,7 +44,7 @@ public class UrlDataDto {
         dto.setVisibility(url.getVisibility());
 
         if (url.getUserUrls() != null) {
-            dto.setId(url.getUserUrls().getId());
+            dto.setUserId(url.getUserUrls().getId());
         }
 
         dto.setCreatedTime(url.getCreatedTime());
