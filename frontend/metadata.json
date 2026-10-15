@@ -1,0 +1,6 @@
+{
+  "name": "TinyRoute - Sub-Millisecond URL Shortener",
+  "description": "Ultra-fast Redis-backed URL shortener with real-time telemetry, routing console, and developer API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
