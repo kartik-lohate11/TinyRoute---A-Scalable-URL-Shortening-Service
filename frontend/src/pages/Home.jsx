@@ -8,22 +8,21 @@ export default function Home({ onToast }) {
   const navigate = useNavigate();
 
   // Form states
-  const [longUrl, setLongUrl] = useState(
-    'https://github.com/torvalds/linux/commit/884612d7c07b46bb3e34ae76dfb'
-  );
+  const [longUrl, setLongUrl] = useState('');
   const [customSlug, setCustomSlug] = useState('');
   const [showAliasPanel, setShowAliasPanel] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [guestUsage, setGuestUsage] = useState({ used: 2, max: 5 });
-
-  // Current shortened result
-  const [currentResult, setCurrentResult] = useState({
-    shortUrl: 'https://tinyroute.io/Ab3x9K',
-    originalUrl: 'https://github.com/torvalds/linux/commit/884612d7c07b46bb3e34ae76dfb',
-    tag: 'linux-kernel-repo',
-    clicks: 0,
-    created: '10s ago',
+  const [guestUsage, setGuestUsage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tinyroute_guest_usage');
+      return saved ? JSON.parse(saved) : { used: 0, max: 5 };
+    } catch {
+      return { used: 0, max: 5 };
+    }
   });
+
+  // Current shortened result (null initially until shortened from API)
+  const [currentResult, setCurrentResult] = useState(null);
 
   // QR Modal state
   const [isQrOpen, setIsQrOpen] = useState(false);
@@ -36,41 +35,33 @@ export default function Home({ onToast }) {
     setIsLoading(true);
     try {
       const response = await shortenUrl({
-        url: longUrl,
-        customSlug: customSlug.trim() || undefined,
+        url: longUrl.trim(),
       });
 
-      const routeData = response.data?.route || {
-        shortUrl: response.data.short_url,
-        originalUrl: longUrl,
-        tag: longUrl.includes('github') ? 'github-repo' : 'web-destination',
-        clicks: 0,
-        created: 'Just now',
-      };
+      const routeData = response.data?.route;
+      if (routeData) {
+        setCurrentResult(routeData);
+      }
 
-      setCurrentResult({
-        shortUrl: routeData.shortUrl,
-        originalUrl: routeData.originalUrl,
-        tag: routeData.tag || 'web-destination',
-        clicks: 0,
-        created: 'Just now',
+      setGuestUsage((prev) => {
+        const next = { ...prev, used: Math.min(prev.used + 1, prev.max) };
+        try {
+          localStorage.setItem('tinyroute_guest_usage', JSON.stringify(next));
+        } catch {}
+        return next;
       });
-
-      setGuestUsage((prev) => ({
-        ...prev,
-        used: Math.min(prev.used + 1, prev.max),
-      }));
 
       if (onToast) {
-        onToast(
-          response.isMock
-            ? 'Short link cached to local edge! (Connected to mock engine)'
-            : 'Link successfully compressed & written to Spring Boot Redis hash!'
-        );
+        onToast('Short URL generated successfully via backend!');
       }
     } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        (typeof err.response?.data === 'string' ? err.response?.data : null) ||
+        err.message ||
+        'Failed to shorten URL';
       if (onToast) {
-        onToast(err.message || 'Failed to shorten URL. Check format.');
+        onToast(msg);
       }
     } finally {
       setIsLoading(false);

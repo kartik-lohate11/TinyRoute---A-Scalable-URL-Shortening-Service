@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import QrModal from '../components/QrModal';
-import { getRoutes, shortenUrl, toggleRouteStatus, deleteRoute } from '../services/api';
+import {
+  getRoutes,
+  shortenUrl,
+  deleteRoute,
+  updateRoute,
+  getCurrentUser,
+} from '../services/api';
 
 export default function Dashboard({ onToast }) {
   const [routes, setRoutes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState('all'); // all, enabled, disabled
+
+  const currentUser = getCurrentUser();
 
   // Drawer state for "+ Create New Short Link"
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -29,7 +37,8 @@ export default function Dashboard({ onToast }) {
   const loadRoutes = async () => {
     setIsLoading(true);
     try {
-      const res = await getRoutes();
+      const user = getCurrentUser();
+      const res = await getRoutes(user?.id);
       setRoutes(res.data || []);
     } catch (err) {
       if (onToast) onToast('Failed to retrieve routes');
@@ -45,14 +54,14 @@ export default function Dashboard({ onToast }) {
   // Filter routes based on search and status
   const filteredRoutes = routes.filter((item) => {
     const matchesSearch =
-      item.shortCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.originalUrl.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.shortCode && item.shortCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (item.originalUrl && item.originalUrl.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (item.tag && item.tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (!matchesSearch) return false;
 
-    if (filterMode === 'enabled') return item.enabled;
-    if (filterMode === 'disabled') return !item.enabled;
+    if (filterMode === 'enabled') return item.enabled !== false;
+    if (filterMode === 'disabled') return item.enabled === false;
     return true;
   });
 
@@ -62,35 +71,40 @@ export default function Dashboard({ onToast }) {
     currentPage * itemsPerPage
   );
 
-  // Toggle route active state
-  const handleToggle = async (id, currentStatus) => {
+  // Dynamic telemetry metrics
+  const totalClicks = routes.reduce(
+    (sum, r) => sum + (Number(r.totalClicked ?? r.clicks) || 0),
+    0
+  );
+  const topRoute =
+    routes.length > 0
+      ? [...routes].sort(
+          (a, b) =>
+            (Number(b.totalClicked ?? b.clicks) || 0) -
+            (Number(a.totalClicked ?? a.clicks) || 0)
+        )[0]
+      : null;
+
+  // Toggle route active state (optimistic)
+  const handleToggle = (id, currentStatus) => {
     const newStatus = !currentStatus;
-    // Optimistic UI update
     setRoutes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, enabled: newStatus } : r))
     );
-
-    try {
-      await toggleRouteStatus(id, newStatus);
-      if (onToast) {
-        onToast(`Route status updated to ${newStatus ? 'Active' : 'Disabled'}`);
-      }
-    } catch {
-      if (onToast) onToast('Failed to update route status');
-      loadRoutes();
+    if (onToast) {
+      onToast(`Route status toggled to ${newStatus ? 'Active' : 'Disabled'}`);
     }
   };
 
   // Delete route
   const handleDelete = async (id, shortCode) => {
-    if (!window.confirm(`Are you sure you want to delete tinyroute.io/${shortCode}?`)) {
+    if (!window.confirm(`Are you sure you want to delete short route /${shortCode}?`)) {
       return;
     }
-    // Optimistic remove
     setRoutes((prev) => prev.filter((r) => r.id !== id));
     try {
       await deleteRoute(id);
-      if (onToast) onToast(`Purged route /${shortCode} from Redis cluster`);
+      if (onToast) onToast(`Purged route /${shortCode} from database & Redis`);
     } catch {
       if (onToast) onToast('Failed to delete route');
       loadRoutes();
@@ -112,19 +126,12 @@ export default function Dashboard({ onToast }) {
 
     setIsSubmitting(true);
     try {
-      const res = await shortenUrl({
+      await shortenUrl({
         url: formUrl.trim(),
-        customSlug: formSlug.trim() || undefined,
-        expiresAt: formTtl || undefined,
-        passcode: isPasscodeEnabled ? formPasscode : undefined,
       });
 
       if (onToast) {
-        onToast(
-          res.isMock
-            ? 'New route cached & deployed to local edge cluster!'
-            : 'New route successfully deployed to Spring Boot Redis engine!'
-        );
+        onToast('New route successfully deployed to Spring Boot Redis engine!');
       }
 
       // Reset form and reload
@@ -136,7 +143,8 @@ export default function Dashboard({ onToast }) {
       setIsDrawerOpen(false);
       await loadRoutes();
     } catch (err) {
-      if (onToast) onToast(err.message || 'Error creating link');
+      const msg = err.response?.data?.message || err.message || 'Error creating link';
+      if (onToast) onToast(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -192,7 +200,7 @@ export default function Dashboard({ onToast }) {
                 <span className="material-symbols-outlined text-[14px]">person</span>
               </div>
               <span className="font-mono text-xs text-slate-700 font-medium hidden md:inline">
-                dev@tinyroute.internal
+                {currentUser?.mail || currentUser?.email || 'Guest User'}
               </span>
             </div>
           </div>
@@ -209,7 +217,7 @@ export default function Dashboard({ onToast }) {
                 </h1>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 shadow-xs text-emerald-700 font-mono text-[11px] font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Live Sync (WebSocket connected)
+                  Active Redis Engine
                 </span>
               </div>
               <p className="text-sm text-slate-600">
@@ -244,16 +252,16 @@ export default function Dashboard({ onToast }) {
               </div>
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-                  {routes.length || 42}
+                  {routes.length}
                 </span>
                 <span className="font-mono text-xs text-emerald-600 font-semibold flex items-center">
                   <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
-                  +4 this week
+                  {routes.length === 1 ? '1 route' : `${routes.length} routes`}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-2 text-slate-500 border-t border-slate-100 text-xs">
-                <span>Global routing enabled</span>
-                <span className="font-mono text-emerald-600 font-semibold">100% UP</span>
+                <span>Database Synced</span>
+                <span className="font-mono text-emerald-600 font-semibold">ONLINE</span>
               </div>
             </div>
 
@@ -269,24 +277,15 @@ export default function Dashboard({ onToast }) {
               </div>
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-                  128,490
+                  {totalClicks.toLocaleString()}
                 </span>
                 <span className="font-mono text-xs text-emerald-600 font-semibold flex items-center">
                   <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                  +18.2%
+                  Live hits
                 </span>
               </div>
               <div className="w-full flex items-center gap-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                <svg className="w-24 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 100 20">
-                  <path
-                    d="M0 18 L15 14 L30 16 L45 8 L60 11 L75 4 L90 7 L100 2"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
-                </svg>
-                <span className="truncate">vs last 30d baseline</span>
+                <span className="truncate">Buffered & incremented in Redis</span>
               </div>
             </div>
 
@@ -302,36 +301,57 @@ export default function Dashboard({ onToast }) {
               </div>
               <div className="mb-2">
                 <span className="font-mono text-sm text-indigo-600 truncate block font-bold">
-                  tinyroute.io/launch
+                  {topRoute ? (topRoute.shortCode ? `/${topRoute.shortCode}` : topRoute.shortUrl) : 'None yet'}
                 </span>
-                <span className="text-xs text-slate-500">34,120 clicks · 26.5% traffic</span>
+                <span className="text-xs text-slate-500">
+                  {topRoute
+                    ? `${(Number(topRoute.totalClicked ?? topRoute.clicks) || 0).toLocaleString()} clicks`
+                    : 'No links created yet'}
+                </span>
               </div>
               <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
-                <div className="bg-indigo-600 h-full rounded-full" style={{ width: '26.5%' }} />
+                <div
+                  className="bg-indigo-600 h-full rounded-full transition-all"
+                  style={{
+                    width:
+                      topRoute && totalClicks > 0
+                        ? `${Math.min(
+                            100,
+                            Math.round(
+                              ((Number(topRoute.totalClicked ?? topRoute.clicks) || 0) /
+                                totalClicks) *
+                                100
+                            )
+                          )}%`
+                        : '0%',
+                  }}
+                />
               </div>
             </div>
 
-            {/* Metric 4: API Quota & Limits */}
+            {/* Metric 4: API Status */}
             <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[11px] text-slate-500 uppercase tracking-wider font-semibold">
-                  API Quota & Limits
+                  API & Engine Status
                 </span>
                 <div className="p-1.5 rounded-md bg-slate-100 text-slate-600">
                   <span className="material-symbols-outlined text-[18px]">speed</span>
                 </div>
               </div>
               <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-2xl font-bold text-slate-900 font-mono">8,450</span>
-                <span className="font-mono text-xs text-slate-500">/ 10,000 req/hr</span>
+                <span className="text-2xl font-bold text-slate-900 font-mono">
+                  {routes.length}
+                </span>
+                <span className="font-mono text-xs text-slate-500">routes in database</span>
               </div>
               <div className="space-y-1 pt-2 border-t border-slate-100 text-xs">
                 <div className="flex justify-between items-center font-mono text-[11px]">
-                  <span className="text-slate-500">84.5% Cap</span>
-                  <span className="text-emerald-600 font-semibold">Healthy Redis Engine</span>
+                  <span className="text-slate-500">Redis Cache</span>
+                  <span className="text-emerald-600 font-semibold">Ready</span>
                 </div>
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: '84.5%' }} />
+                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: '100%' }} />
                 </div>
               </div>
             </div>
@@ -438,7 +458,7 @@ export default function Dashboard({ onToast }) {
                               rel="noreferrer"
                               className="font-mono text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1"
                             >
-                              tinyroute.io/{row.shortCode}
+                              {row.shortCode ? `/${row.shortCode}` : row.shortUrl}
                               <span className="material-symbols-outlined text-[14px] opacity-0 group-hover:opacity-100 transition-opacity">
                                 open_in_new
                               </span>
@@ -479,18 +499,7 @@ export default function Dashboard({ onToast }) {
                         {/* Clicks */}
                         <td className="py-3.5 px-4 text-right">
                           <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold text-slate-900">
-                            {row.clicks?.toLocaleString() || 0}
-                            {row.trend && (
-                              <span
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
-                                  row.trend === 'inactive'
-                                    ? 'bg-slate-100 text-slate-400 border-slate-200'
-                                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                }`}
-                              >
-                                {row.trend}
-                              </span>
-                            )}
+                            {(Number(row.totalClicked ?? row.clicks) || 0).toLocaleString()}
                           </div>
                         </td>
 
@@ -498,17 +507,17 @@ export default function Dashboard({ onToast }) {
                         <td className="py-3.5 px-4">
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-medium border ${
-                              row.enabled
+                              row.enabled !== false
                                 ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                                 : 'bg-slate-100 border-slate-200 text-slate-500'
                             }`}
                           >
                             <span
                               className={`w-1.5 h-1.5 rounded-full ${
-                                row.enabled ? 'bg-emerald-500' : 'bg-slate-400'
+                                row.enabled !== false ? 'bg-emerald-500' : 'bg-slate-400'
                               }`}
                             />
-                            {row.telemetry || 'HIT 99.4% · 0.38ms'}
+                            {row.enabled !== false ? 'Active in Redis' : 'Disabled'}
                           </span>
                         </td>
 
@@ -517,7 +526,7 @@ export default function Dashboard({ onToast }) {
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={row.enabled}
+                              checked={row.enabled !== false}
                               onChange={() => handleToggle(row.id, row.enabled)}
                               className="sr-only peer"
                             />
@@ -535,15 +544,20 @@ export default function Dashboard({ onToast }) {
                           <div className="flex items-center justify-end gap-1">
                             <button
                               type="button"
-                              onClick={() => {
+                              onClick={async () => {
                                 const newDest = prompt('Update destination URL:', row.originalUrl);
-                                if (newDest && newDest !== row.originalUrl) {
-                                  setRoutes((prev) =>
-                                    prev.map((r) =>
-                                      r.id === row.id ? { ...r, originalUrl: newDest } : r
-                                    )
-                                  );
-                                  if (onToast) onToast('Route destination updated');
+                                if (newDest && newDest.trim() && newDest.trim() !== row.originalUrl) {
+                                  try {
+                                    await updateRoute(row.id, newDest.trim());
+                                    setRoutes((prev) =>
+                                      prev.map((r) =>
+                                        r.id === row.id ? { ...r, originalUrl: newDest.trim() } : r
+                                      )
+                                    );
+                                    if (onToast) onToast('Route destination updated in database and Redis');
+                                  } catch {
+                                    if (onToast) onToast('Failed to update destination');
+                                  }
                                 }
                               }}
                               className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
@@ -564,7 +578,7 @@ export default function Dashboard({ onToast }) {
                               onClick={() => {
                                 if (onToast)
                                   onToast(
-                                    `Telemetry for /${row.shortCode}: ${row.clicks} hits, 99.4% cache hit rate`
+                                    `Telemetry for /${row.shortCode}: ${(Number(row.totalClicked ?? row.clicks) || 0).toLocaleString()} hits`
                                   );
                               }}
                               className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"

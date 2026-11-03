@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { getCurrentUser } from '../services/api';
 
 export default function Navbar({ onToast }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const user = getCurrentUser();
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
@@ -105,9 +107,9 @@ export default function Navbar({ onToast }) {
           {/* Live Node pill */}
           <div className="relative flex items-center gap-2 pl-3 border-l border-slate-200">
             <Link
-              to="/dashboard"
+              to={user ? "/dashboard" : "/login"}
               className="relative flex items-center cursor-pointer"
-              title="dev@tinyroute.internal"
+              title={user?.mail || user?.email || "Guest"}
             >
               <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-semibold">
                 <span className="material-symbols-outlined text-indigo-600 text-[18px]">person</span>

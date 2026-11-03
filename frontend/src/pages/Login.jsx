@@ -8,17 +8,18 @@ export default function Login({ onToast }) {
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
 
-  const [email, setEmail] = useState('dev@tinyroute.internal');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email.trim() || !password) return;
     setIsLoading(true);
 
     try {
-      await loginUser(email, password);
-      if (onToast) onToast('Authenticated as Architect (dev@tinyroute.internal)');
+      await loginUser(email.trim(), password);
+      if (onToast) onToast('Signed in successfully');
       navigate(from, { replace: true });
     } catch {
       if (onToast) onToast('Login failed. Please verify credentials.');
@@ -30,7 +31,7 @@ export default function Login({ onToast }) {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await loginUser('architect.google@tinyroute.internal', 'google_sso_token');
+      await loginUser('google.user@tinyroute.com', 'google_sso_token');
       if (onToast) onToast('Signed in with Google SSO');
       navigate(from, { replace: true });
     } finally {

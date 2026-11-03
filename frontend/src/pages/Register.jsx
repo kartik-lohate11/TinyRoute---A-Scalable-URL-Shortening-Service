@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { loginUser } from '../services/api';
+import { registerUser } from '../services/api';
 
 export default function Register({ onToast }) {
   const navigate = useNavigate();
-  const [name, setName] = useState('Senior Architect');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email.trim() || !password) return;
     setIsLoading(true);
 
     try {
-      await loginUser(email || 'dev@tinyroute.internal', password || 'secret');
-      if (onToast) onToast('Account provisioned on TinyRoute Redis edge!');
+      await registerUser(email.trim(), password);
+      if (onToast) onToast('Account created successfully!');
       navigate('/dashboard');
-    } catch {
-      if (onToast) onToast('Failed to create account.');
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to create account.';
+      if (onToast) onToast(msg);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +78,7 @@ export default function Register({ onToast }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="dev@tinyroute.internal"
+                  placeholder="name@example.com"
                   className="w-full bg-transparent text-slate-900 text-xs font-mono focus:outline-none"
                 />
               </div>

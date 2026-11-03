@@ -1,13 +1,14 @@
 import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { logoutUser } from '../services/api';
+import { logoutUser, getCurrentUser } from '../services/api';
 
 export default function Sidebar({ onToast }) {
   const navigate = useNavigate();
+  const user = getCurrentUser();
 
   const handleLogout = () => {
     logoutUser();
-    if (onToast) onToast('Signed out of Architect console');
+    if (onToast) onToast('Signed out successfully');
     navigate('/login');
   };
 
@@ -82,10 +83,12 @@ export default function Sidebar({ onToast }) {
             <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shadow-sm text-white">
               <span className="material-symbols-outlined text-[18px]">person</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-900 leading-tight">My Account</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-semibold text-slate-900 leading-tight truncate max-w-[120px]">
+                {user?.mail || user?.email || 'My Account'}
+              </span>
               <span className="text-[10px] font-mono text-emerald-600 font-medium leading-tight mt-0.5">
-                Active
+                {user ? 'Online' : 'Guest'}
               </span>
             </div>
           </div>
