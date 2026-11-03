@@ -39,14 +39,14 @@ export default function Register({ onToast }) {
               Create TinyRoute Account
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Start compressing links with sub-millisecond global Redis routing.
+              Create an account to manage and track your shortened links.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono font-medium text-slate-700 mb-1">
-                Full Name / Organization
+                Full Name
               </label>
               <div className="flex items-center rounded-lg bg-slate-50 border border-slate-300 px-3 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-600 transition-all">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">
@@ -65,7 +65,7 @@ export default function Register({ onToast }) {
 
             <div>
               <label className="block text-xs font-mono font-medium text-slate-700 mb-1">
-                Developer Email
+                Email Address
               </label>
               <div className="flex items-center rounded-lg bg-slate-50 border border-slate-300 px-3 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-600 transition-all">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">

@@ -14,9 +14,7 @@ export default function Navbar({ onToast }) {
   };
 
   const navLinks = [
-    { label: 'Features', path: '/' },
-    { label: 'API & Docs', path: '/api-keys' },
-    { label: 'Pricing / Plans', path: '/#pricing' },
+    { label: 'Home', path: '/' },
     { label: 'Dashboard', path: '/dashboard' },
   ];
 
@@ -99,7 +97,7 @@ export default function Navbar({ onToast }) {
               to="/dashboard"
               className="h-9 px-3.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-mono text-xs shadow-sm hover:shadow-md hover:brightness-105 active:scale-[0.99] transition-all flex items-center gap-1.5 font-semibold"
             >
-              <span>Routing Console</span>
+              <span>My Dashboard</span>
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
             </Link>
           </div>

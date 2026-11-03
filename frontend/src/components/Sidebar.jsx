@@ -59,69 +59,20 @@ export default function Sidebar({ onToast }) {
                   isActive ? 'text-indigo-600' : 'text-slate-400'
                 }`}
               >
-                terminal
+                link
               </span>
-              <span>Routing Console</span>
+              <span>My Short Links</span>
             </>
           )}
         </NavLink>
 
-        <NavLink
-          to="/api-keys"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-              isActive
-                ? 'bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`
-          }
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-medium text-sm"
         >
-          {({ isActive }) => (
-            <>
-              <span
-                className={`material-symbols-outlined text-[20px] ${
-                  isActive ? 'text-indigo-600' : 'text-slate-400'
-                }`}
-              >
-                key
-              </span>
-              <span>API Tokens</span>
-            </>
-          )}
-        </NavLink>
-
-        <button
-          onClick={() => {
-            if (onToast) onToast('Telemetry streaming at 0.38ms average edge latency');
-          }}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-medium text-sm text-left"
-        >
-          <span className="material-symbols-outlined text-[20px] text-slate-400">query_stats</span>
-          <span>Telemetry & Caching</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (onToast) onToast('28 Edge PoPs active with Anycast DNS routing');
-          }}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-medium text-sm text-left"
-        >
-          <span className="material-symbols-outlined text-[20px] text-slate-400">dns</span>
-          <span>Edge Domains</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (onToast) onToast('Redis Engine v7.2-active-replica in sync');
-          }}
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors font-medium text-sm text-left"
-        >
-          <span className="material-symbols-outlined text-[20px] text-slate-400">tune</span>
-          <span>Config & Engine</span>
-        </button>
+          <span className="material-symbols-outlined text-[20px] text-slate-400">add_circle</span>
+          <span>Shorten New URL</span>
+        </Link>
       </nav>
 
       {/* User / Status Footer */}
@@ -132,9 +83,9 @@ export default function Sidebar({ onToast }) {
               <span className="material-symbols-outlined text-[18px]">person</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-semibold text-slate-900 leading-tight">Architect</span>
+              <span className="text-xs font-semibold text-slate-900 leading-tight">My Account</span>
               <span className="text-[10px] font-mono text-emerald-600 font-medium leading-tight mt-0.5">
-                Online · 0.8ms
+                Active
               </span>
             </div>
           </div>

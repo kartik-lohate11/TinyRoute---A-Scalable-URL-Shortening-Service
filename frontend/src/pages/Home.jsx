@@ -123,7 +123,7 @@ export default function Home({ onToast }) {
 
             {/* Subtitle */}
             <p className="text-base sm:text-lg text-slate-600 text-center max-w-2xl mb-10 leading-relaxed font-normal">
-              Powered by high-throughput Redis caching and distributed telemetry. Built for engineers, infrastructure teams, and scale-first platforms.
+              Fast, reliable link shortening with real-time click tracking and instant QR codes. Shorten and share your links in seconds.
             </p>
 
             {/* Quick Shortener Hero Console Box */}
@@ -449,29 +449,25 @@ export default function Home({ onToast }) {
               <div className="bg-white hover:border-indigo-300 rounded-xl p-6 transition-all duration-200 flex flex-col justify-between group shadow-sm hover:shadow-md border border-slate-200">
                 <div>
                   <div className="w-12 h-12 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
-                    <span className="material-symbols-outlined text-[24px] text-teal-600">terminal</span>
+                    <span className="material-symbols-outlined text-[24px] text-teal-600">qr_code_2</span>
                   </div>
                   <span className="font-mono text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
-                    Integration
+                    Sharing
                   </span>
                   <h3 className="text-lg font-bold text-slate-900 mt-1 mb-3">
-                    RESTful Developer API
+                    Instant QR Codes & Sharing
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Bearer token auth, granular rate limiting, outgoing webhooks, and modern SDK wrappers for Go, TypeScript, Python, and Rust with zero overhead.
+                    Generate scannable QR codes for every shortened URL instantly. Perfect for presentations, social media, marketing, and mobile users.
                   </p>
                 </div>
                 <div className="mt-6 pt-4 bg-slate-50 border border-slate-200/70 rounded-lg p-3 flex items-center justify-between">
-                  <code className="font-mono text-xs text-teal-700 font-semibold">
-                    curl -X POST api.tinyroute.io
-                  </code>
-                  <Link
-                    to="/api-keys"
-                    className="material-symbols-outlined text-[16px] text-slate-400 hover:text-indigo-600"
-                    title="View API Docs"
-                  >
-                    code
-                  </Link>
+                  <span className="font-mono text-xs text-teal-700 font-semibold">
+                    One-click download & copy
+                  </span>
+                  <span className="material-symbols-outlined text-[16px] text-teal-600">
+                    check_circle
+                  </span>
                 </div>
               </div>
             </div>
@@ -552,12 +548,12 @@ export default function Home({ onToast }) {
             </span>
           </div>
           <div className="flex items-center gap-4 text-slate-500">
-            <span className="text-slate-400">© 2025 TinyRoute Architecture</span>
-            <Link to="/api-keys" className="hover:text-slate-900 transition-colors">
-              Developer API
+            <span className="text-slate-400">© 2025 TinyRoute</span>
+            <Link to="/dashboard" className="hover:text-slate-900 transition-colors">
+              My Links
             </Link>
-            <a href="#status" onClick={(e) => { e.preventDefault(); onToast && onToast('All 28 global edge nodes operational.'); }} className="hover:text-slate-900 transition-colors">
-              System Status
+            <a href="#features" className="hover:text-slate-900 transition-colors">
+              Features
             </a>
           </div>
         </div>

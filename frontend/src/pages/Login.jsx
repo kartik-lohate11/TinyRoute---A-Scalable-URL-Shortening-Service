@@ -56,7 +56,7 @@ export default function Login({ onToast }) {
               Sign In to TinyRoute
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Access edge routing console, telemetry, and API key management.
+              Manage your shortened links and track real-time click analytics.
             </p>
           </div>
 
@@ -86,7 +86,7 @@ export default function Login({ onToast }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono font-medium text-slate-700 mb-1">
-                Developer Email
+                Email Address
               </label>
               <div className="flex items-center rounded-lg bg-slate-50 border border-slate-300 px-3 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-600 transition-all">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">
@@ -97,7 +97,7 @@ export default function Login({ onToast }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
+                  placeholder="name@example.com"
                   className="w-full bg-transparent text-slate-900 text-xs font-mono focus:outline-none"
                 />
               </div>
@@ -106,11 +106,8 @@ export default function Login({ onToast }) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-mono font-medium text-slate-700">
-                  Password / Token
+                  Password
                 </label>
-                <span className="text-[11px] font-mono text-indigo-600 hover:underline cursor-pointer">
-                  Forgot?
-                </span>
               </div>
               <div className="flex items-center rounded-lg bg-slate-50 border border-slate-300 px-3 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-600 transition-all">
                 <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2">
@@ -132,15 +129,12 @@ export default function Login({ onToast }) {
               disabled={isLoading}
               className="w-full h-11 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-xs font-semibold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 mt-2"
             >
-              {isLoading ? 'Verifying...' : 'Sign In to Console'}
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="mt-5 p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 font-mono text-[11px]">
-            <span className="text-emerald-700 font-semibold block mb-0.5">
-              ● Demo Mode Active
-            </span>
-            Click "Sign In to Console" or "Continue with Google" for instant access.
+          <div className="mt-5 p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 font-mono text-[11px] text-center">
+            Sign in to manage your shortened links and view analytics.
           </div>
 
           <p className="mt-4 text-center font-mono text-xs text-slate-500">
