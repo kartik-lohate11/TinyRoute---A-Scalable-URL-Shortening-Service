@@ -137,6 +137,16 @@ export async function deleteRoute(id) {
 }
 
 /**
+ * Toggle route enabled/disabled status
+ * PATCH /url/{id}/status?visibility=ENABLE|DISABLE
+ */
+export async function toggleRouteStatus(id, enabled) {
+  const visibility = enabled ? 'ENABLE' : 'DISABLE';
+  const response = await apiClient.patch(`/url/${id}/status?visibility=${visibility}`);
+  return normalizeUrlData(response.data);
+}
+
+/**
  * Register user in Spring Boot backend
  * POST /user -> { mail, password }
  */
@@ -150,26 +160,16 @@ export async function registerUser(mail, password) {
 }
 
 /**
- * Login user helper
+ * Login user via backend authentication
+ * POST /user/login -> { mail, password }
  */
 export async function loginUser(mail, password) {
-  // Try registering / authenticating against backend
-  try {
-    const response = await apiClient.post('/user', { mail, password });
-    const user = response.data;
+  const response = await apiClient.post('/user/login', { mail, password });
+  const user = response.data;
+  if (user) {
     localStorage.setItem('tinyroute_user', JSON.stringify(user));
-    return { data: user };
-  } catch (err) {
-    // If user already exists or login endpoint not separate, check if user data exists
-    const existing = getCurrentUser();
-    if (existing && existing.mail === mail) {
-      return { data: existing };
-    }
-    // Set current active user session
-    const sessionUser = { mail, id: 1 };
-    localStorage.setItem('tinyroute_user', JSON.stringify(sessionUser));
-    return { data: sessionUser };
   }
+  return { data: user };
 }
 
 /**

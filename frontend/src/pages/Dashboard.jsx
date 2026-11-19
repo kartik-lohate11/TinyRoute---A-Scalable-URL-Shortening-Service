@@ -6,6 +6,7 @@ import {
   shortenUrl,
   deleteRoute,
   updateRoute,
+  toggleRouteStatus,
   getCurrentUser,
 } from '../services/api';
 
@@ -85,14 +86,20 @@ export default function Dashboard({ onToast }) {
         )[0]
       : null;
 
-  // Toggle route active state (optimistic)
-  const handleToggle = (id, currentStatus) => {
+  // Toggle route active state (optimistic + backend sync)
+  const handleToggle = async (id, currentStatus) => {
     const newStatus = !currentStatus;
     setRoutes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, enabled: newStatus } : r))
     );
-    if (onToast) {
-      onToast(`Route status toggled to ${newStatus ? 'Active' : 'Disabled'}`);
+    try {
+      await toggleRouteStatus(id, newStatus);
+      if (onToast) {
+        onToast(`Route status updated to ${newStatus ? 'Active' : 'Disabled'}`);
+      }
+    } catch {
+      if (onToast) onToast('Failed to update route status');
+      loadRoutes();
     }
   };
 
@@ -437,8 +444,33 @@ export default function Dashboard({ onToast }) {
                 <tbody className="divide-y divide-slate-100 text-slate-900 text-sm">
                   {displayedRoutes.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="py-8 text-center text-slate-500 text-sm">
-                        {isLoading ? 'Loading routing table from Redis...' : 'No routes found.'}
+                      <td colSpan="7" className="py-12 text-center text-slate-500 text-sm">
+                        {isLoading ? (
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-[24px] animate-spin text-indigo-600">
+                              refresh
+                            </span>
+                            <span>Loading routing table from backend...</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center gap-3 py-4">
+                            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                              <span className="material-symbols-outlined text-[24px]">link_off</span>
+                            </div>
+                            <span className="font-semibold text-slate-700">No short links yet</span>
+                            <p className="text-xs text-slate-500 max-w-sm">
+                              Create your first sub-millisecond edge link to start routing traffic and tracking clicks.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setIsDrawerOpen(true)}
+                              className="mt-1 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 text-white font-mono text-xs font-semibold hover:bg-indigo-700 transition-colors shadow-xs"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">add_link</span>
+                              <span>Create Your First Link</span>
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ) : (

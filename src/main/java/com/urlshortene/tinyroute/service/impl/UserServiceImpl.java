@@ -62,7 +62,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto verifyUser(String userName, String password) {
-        return UserDto.toDto(userDataRepository.findByUserNameAndPassword(userName, password).orElseThrow(() -> new UserNotFoundException(userName + " Not Found")));
+    public UserDto verifyUser(String mail, String password) {
+        return UserDto.toDto(userDataRepository.findByMailAndPassword(mail, password)
+                .orElseThrow(() -> new UserNotFoundException("Invalid email or password")));
+    }
+
+    @Override
+    public UserDto loginUser(String mail, String password) {
+        return verifyUser(mail, password);
     }
 }

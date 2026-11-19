@@ -20,6 +20,6 @@ public interface UserService {
     // Delete user
     void deleteUser(Long id);
 
-    UserDto verifyUser(String userName,String password);
-
+    UserDto verifyUser(String mail, String password);
+    UserDto loginUser(String mail, String password);
 }

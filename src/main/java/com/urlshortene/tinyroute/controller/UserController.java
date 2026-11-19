@@ -26,9 +26,13 @@ public class UserController {
         return ResponseEntity.ok("Serve is healthy");
     }
 
-    @PostMapping("/login-verify")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.verifyUser(request.userName(), request.password()));
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDto user) {
+        return ResponseEntity.ok(userService.loginUser(user.getMail(), user.getPassword()));
     }
 
+    @PostMapping("/login-verify")
+    public ResponseEntity<?> loginVerify(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.verifyUser(request.userName(), request.password()));
+    }
 }

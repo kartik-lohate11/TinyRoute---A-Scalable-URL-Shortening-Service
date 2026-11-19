@@ -52,6 +52,13 @@ public class UrlController {
         return ResponseEntity.ok(urlService.updateUrl(request.id(), request.url()));
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> toggleUrlStatus(
+            @PathVariable Long id,
+            @RequestParam com.urlshortene.tinyroute.enums.Visibility visibility) {
+        return ResponseEntity.ok(urlService.toggleUrlStatus(id, visibility));
+    }
+
     @GetMapping("/all-url/{id}")
     public ResponseEntity<?> getAllUserUrl(@PathVariable
                                            Long id) {

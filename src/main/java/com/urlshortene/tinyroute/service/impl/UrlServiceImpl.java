@@ -39,7 +39,11 @@ public class UrlServiceImpl implements UrlService {
         Optional<UrlData> existingUrl = urlDataRepository.findByOriginalUrlAndUserUrlsId(url, userId);
 
         if (existingUrl.isPresent()) {
-            throw new IllegalArgumentException("You have already created a short URL for this URL");
+            UrlData existing = existingUrl.get();
+            if (existing.getShortUrl() != null && existing.getVisibility() == Visibility.ENABLE) {
+                redisService.save(existing.getShortUrl(), existing.getOriginalUrl());
+            }
+            return UrlDataDto.toDto(existing);
         }
 
         UserData userData = userDataRepository.findById(userId)
@@ -77,6 +81,10 @@ public class UrlServiceImpl implements UrlService {
         UrlData urlData = urlDataRepository.findByShortUrl(shortUrl)
                 .orElseThrow(() -> new ResourceNotFoundException("Short URL '" + shortUrl + "' Not Found"));
 
+        if (urlData.getVisibility() == Visibility.DISABLE) {
+            throw new ResourceNotFoundException("Short URL '" + shortUrl + "' is currently disabled");
+        }
+
         String originalUrl = urlData.getOriginalUrl();
 
         // 3. Populate Redis Cache for subsequent requests
@@ -108,7 +116,31 @@ public class UrlServiceImpl implements UrlService {
 
         // Update / Invalidate Redis cache
         if (updated.getShortUrl() != null) {
-            redisService.save(updated.getShortUrl(), url);
+            if (updated.getVisibility() == Visibility.ENABLE) {
+                redisService.save(updated.getShortUrl(), url);
+            } else {
+                redisService.delete(updated.getShortUrl());
+            }
+        }
+
+        return UrlDataDto.toDto(updated);
+    }
+
+    @Override
+    @Transactional
+    public UrlDataDto toggleUrlStatus(Long id, Visibility visibility) {
+        UrlData urlData = urlDataRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Url not found with id: " + id));
+
+        urlData.setVisibility(visibility);
+        UrlData updated = urlDataRepository.save(urlData);
+
+        if (updated.getShortUrl() != null) {
+            if (visibility == Visibility.ENABLE) {
+                redisService.save(updated.getShortUrl(), updated.getOriginalUrl());
+            } else {
+                redisService.delete(updated.getShortUrl());
+            }
         }
 
         return UrlDataDto.toDto(updated);

@@ -25,6 +25,9 @@ public interface UrlService {
     // Delete URL
     void deleteUrl(Long id);
 
+    // Toggle URL visibility (ENABLE / DISABLE)
+    UrlDataDto toggleUrlStatus(Long id, com.urlshortene.tinyroute.enums.Visibility visibility);
+
     // Increase click count
     void increaseClickCount(String shortUrl);
 
