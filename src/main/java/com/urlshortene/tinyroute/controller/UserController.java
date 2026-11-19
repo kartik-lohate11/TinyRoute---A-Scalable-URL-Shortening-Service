@@ -1,5 +1,6 @@
 package com.urlshortene.tinyroute.controller;
 
+import com.urlshortene.tinyroute.dto.Request.LoginRequest;
 import com.urlshortene.tinyroute.dto.UserDto;
 import com.urlshortene.tinyroute.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,13 @@ public class UserController {
     }
 
     @GetMapping("/health")
-    public ResponseEntity<?> health(){
+    public ResponseEntity<?> health() {
         return ResponseEntity.ok("Serve is healthy");
     }
 
+    @PostMapping("/login-verify")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.verifyUser(request.userName(), request.password()));
+    }
 
 }

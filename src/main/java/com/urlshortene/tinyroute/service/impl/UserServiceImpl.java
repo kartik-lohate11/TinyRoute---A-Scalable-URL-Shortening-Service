@@ -60,4 +60,9 @@ public class UserServiceImpl implements UserService {
         UserData user = userDataRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         userDataRepository.delete(user);
     }
+
+    @Override
+    public UserDto verifyUser(String userName, String password) {
+        return UserDto.toDto(userDataRepository.findByUserNameAndPassword(userName, password).orElseThrow(() -> new UserNotFoundException(userName + " Not Found")));
+    }
 }

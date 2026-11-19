@@ -66,7 +66,4 @@ public class UrlController {
         String clientIp = urlService.extractClientIp(httpRequest);
         return ResponseEntity.ok(urlService.createPublicShortUrl(request.url(), clientIp));
     }
-
-
-
 }

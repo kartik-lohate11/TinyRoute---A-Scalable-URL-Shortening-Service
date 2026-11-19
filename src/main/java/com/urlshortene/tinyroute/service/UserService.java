@@ -20,4 +20,6 @@ public interface UserService {
     // Delete user
     void deleteUser(Long id);
 
+    UserDto verifyUser(String userName,String password);
+
 }
